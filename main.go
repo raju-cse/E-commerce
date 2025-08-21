@@ -27,27 +27,32 @@ var productList []Product
 func getProducts(w http.ResponseWriter, r *http.Request){
 
   handleCors(w)
-  handlePreflightReg(w, r) 
-	
-	if r.Method != "GET"{
-	http.Error(w, "give me GET request", 400)
-	return
- }
+
+	if r.Method == "OPTIONS"{
+		w.WriteHeader(200)
+		return
+	}
+ 
+		
  sendData(w, productList, 200)
-//  encoder := json.NewEncoder(w)
-//  encoder.Encode(productList)
+
 
 }
 
 func createProduct(w http.ResponseWriter, r *http.Request){
 	
   handleCors(w)
-  handlePreflightReg(w, r)
 
-  if r.Method != "POST"{
-		http.Error(w, "Plz give me post requst", 400)
+	if r.Method == "OPTIONS"{
+		w.WriteHeader(200)
 		return
-	}
+	} 
+  // handlePreflightReg(w, r)
+
+  // if r.Method != "POST"{
+	// 	http.Error(w, "Plz give me post requst", 400)
+	// 	return
+	// }
 
 	var newProduct Product  //Create struct instance 
 
@@ -64,9 +69,7 @@ func createProduct(w http.ResponseWriter, r *http.Request){
 	productList = append(productList, newProduct)
 
 	sendData(w, newProduct, 201)
-	// w.WriteHeader(201)
-	// encoder := json.NewEncoder(w)
-	// encoder.Encode(newProduct)
+	
 
 }
 
@@ -97,10 +100,12 @@ func sendData(w http.ResponseWriter, data interface{}, statusCode int){
 func main(){
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/hello", hellohHandler)
- 	mux.HandleFunc("/about", aboutHandler)
-	mux.HandleFunc("/products", getProducts)
-	mux.HandleFunc("/create-products", createProduct)
+	mux.Handle("GET /hello", http.HandlerFunc(hellohHandler))
+ 	mux.Handle("GET /about", http.HandlerFunc(aboutHandler))
+	mux.Handle("GET /products", http.HandlerFunc(getProducts))
+	mux.Handle("OPTIONS /products", http.HandlerFunc(getProducts))
+	mux.Handle("POST /create-products", http.HandlerFunc(createProduct) )
+	mux.Handle("OPTIONS /create-products", http.HandlerFunc(createProduct))
 
 
 	fmt.Println("Server running on : 8080")
