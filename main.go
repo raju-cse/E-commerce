@@ -22,39 +22,34 @@ type Product struct{
 	IngUrl       string  `json:"imageUrl"`
 }
 
-
-
 var productList []Product
 
 func getProducts(w http.ResponseWriter, r *http.Request){
-	w.Header().Set("Access-Control-Allow-Origin","*")
-	w.Header().Set("Content-Type", "application/json")
- if r.Method != "GET"{
+
+  handleCors(w)
+  handlePreflightReg(w, r) 
+	
+	if r.Method != "GET"{
 	http.Error(w, "give me GET request", 400)
 	return
  }
-
- encoder := json.NewEncoder(w)
- encoder.Encode(productList)
+ sendData(w, productList, 200)
+//  encoder := json.NewEncoder(w)
+//  encoder.Encode(productList)
 
 }
 
 func createProduct(w http.ResponseWriter, r *http.Request){
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Conten-Type", "application/json")
+	
+  handleCors(w)
+  handlePreflightReg(w, r)
 
-	if r.Method == "OPTIONS"{
-		w.WriteHeader(200)
-		return
-	}
   if r.Method != "POST"{
 		http.Error(w, "Plz give me post requst", 400)
 		return
 	}
 
-	var newProduct Product
+	var newProduct Product  //Create struct instance 
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&newProduct)
@@ -68,10 +63,35 @@ func createProduct(w http.ResponseWriter, r *http.Request){
 	newProduct.ID = len(productList)+1
 	productList = append(productList, newProduct)
 
-	w.WriteHeader(201)
-	encoder := json.NewEncoder(w)
-	encoder.Encode(newProduct)
+	sendData(w, newProduct, 201)
+	// w.WriteHeader(201)
+	// encoder := json.NewEncoder(w)
+	// encoder.Encode(newProduct)
 
+}
+
+func handleCors(w http.ResponseWriter){
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+	
+
+}
+
+func handlePreflightReg(w http.ResponseWriter, r *http.Request){
+
+	 if r.Method == "OPTIONS"{
+		w.WriteHeader(200)
+	}
+}
+
+func sendData(w http.ResponseWriter, data interface{}, statusCode int){
+
+	w.WriteHeader(statusCode)
+	encode := json.NewEncoder(w)
+	encode.Encode(data)
 }
 
 func main(){
