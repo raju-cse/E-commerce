@@ -1,0 +1,61 @@
+package config
+
+import (
+	"fmt"
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
+)
+
+var configurations Config
+
+type Config struct{
+	Version  		string
+	ServiceName string
+	HttpPort 		int
+}
+
+func loadConfig(){
+	err := godotenv.Load()
+	if err != nil{
+		fmt.Println("Failed to load the env variable", err)
+		os.Exit(1)
+	}
+
+	version := os.Getenv("VERSION")
+	if version == ""{
+		fmt.Println("Version is required")
+		os.Exit(1)
+	}
+
+	serviceName := os.Getenv("SERVICE_NAME")
+	if serviceName == ""{
+		fmt.Println("Service name is required")
+		os.Exit(1)
+	}
+
+	httpPoert := os.Getenv("HTTP_PORT")
+	if httpPoert == ""{
+		fmt.Println("HttpPort is required")
+		os.Exit(1)
+	}
+  
+	poet, err := strconv.ParseInt(httpPoert, 10, 64)
+
+	if err != nil{
+		fmt.Println("Port must me number")
+		os.Exit(1)
+	}
+
+	configurations = Config{
+		Version:       version,
+		ServiceName:  serviceName,
+		HttpPort:     int(poet),
+	}
+}
+
+func GetConfig()Config{
+	loadConfig()
+	return configurations
+}
