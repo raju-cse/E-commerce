@@ -1,7 +1,7 @@
 package product
 
 import (
-	"ecommerce/database"
+	"ecommerce/repo"
 	"ecommerce/util"
 	"encoding/base64"
 	"encoding/json"
@@ -9,69 +9,42 @@ import (
 	"net/http"
 )
 
+type ReqCreateProduct struct{
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+	Price        float64 `json:"price"`
+	IngUrl       string  `json:"imageUrl"`
+}
+
+
 func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request){
 	
-	
-	// header := r.Header.Get("Authorization")
-
-	// if header == ""{
-	// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
-	// 	return
-	// }
-   
-	// headerArr := strings.Split(header," ")
-
-	// if len(headerArr) != 2 {
-	// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
-	// 	return
-	// }
-
-	// accessToken := headerArr[1]
-
-	// tokenParts := strings.Split(accessToken, ".")
-	// if len(tokenParts) != 3 {
-	// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
-	// 	return
-	// }
-	
-	// jwtHeader := tokenParts[0]
-	// jwtPayload := tokenParts[1]
-	// signature := tokenParts[2]
-	 
-	// message := jwtHeader +"." + jwtPayload
-
-  // cnf := config.GetConfig()
-
-  // byteArrSecret := []byte(cnf.JwtSecretKey)
-	// byteArrMessage := []byte(message)
-
-  // h :=	hmac.New(sha256.New, byteArrSecret)
-	// h.Write(byteArrMessage)
-  
-	// hash := h.Sum(nil)
-	// newSignature := base64UrlEncode(hash)
-
-	// if newSignature != signature {
-	// 	http.Error(w, "Unauthorized. tui hala Hacker", http.StatusUnauthorized)
-	// 	return
-	// }
-
-
-	var newProduct database.Product  //Create struct instance 
+	var req ReqCreateProduct  //Create struct instance 
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&newProduct)
+	err := decoder.Decode(&req)
 
 	if err != nil{
 		fmt.Println(err)
-		http.Error(w, "plz give me valid json", 400)
+		util.SendError(w, http.StatusBadRequest, "Invalid req body")
 		return
 	}
 
 	
- createdProduct := database.Store(newProduct)
+ createdProduct, err := h.productRepo.Create(repo.Product{
+	Title: req.Title,
+	Description: req.Description,
+	Price: req.Price,
+	IngUrl: req.IngUrl,
 
-	util.SendData(w, createdProduct, 201)
+ }) 
+
+ if err != nil{
+	util.SendError(w, http.StatusInternalServerError, "Internal Server Error")
+	return
+ }
+
+	util.SendData(w, http.StatusCreated, createdProduct)
 	
 }
 
