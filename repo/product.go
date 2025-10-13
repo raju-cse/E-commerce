@@ -24,18 +24,8 @@ type ProductRepo interface{
 }
 
 type productRepo struct{
-	// productList []*Product
 	db *sqlx.DB
 }
-
-// func NewProductRepo(db *sqlx.DB) productRepo {
-// 	return &productRepo{
-// 		db: db,
-// 	}
-// 	// generateInitialProducts(repo)
-// 	// return *repo
-
-// }
 
 func NewProductRepo(db *sqlx.DB) ProductRepo {
     return &productRepo{
@@ -44,9 +34,6 @@ func NewProductRepo(db *sqlx.DB) ProductRepo {
 }
 
 func (r *productRepo) Create(p Product) (*Product, error){
-	// p.ID = len(r.productList)+1
-	// r.productList = append(r.productList, &p)
-	// return  &p, nil
 
 	query := `
 		INSERT INTO products (
@@ -73,13 +60,6 @@ func (r *productRepo) Create(p Product) (*Product, error){
 }
 
 func (r *productRepo) Get(id int) (*Product, error){
-	// for _, product := range r.productList{
-	// 	if product.ID == productID{
-	// 		return product, nil
-	// 	}
-	// }
-
-	// return nil , nil
 
 	var prd Product
 
@@ -105,7 +85,6 @@ func (r *productRepo) Get(id int) (*Product, error){
 }
 
 func (r *productRepo) List() ([]*Product, error){
-	// return r.productList, nil
 
 	var prdList []*Product
 
@@ -128,17 +107,6 @@ func (r *productRepo) List() ([]*Product, error){
 }
 
 func (r *productRepo)	Delete(id int) error{
-	// 	var tempList []*Product
-
-	// for _, p := range r.productList{
-	// 	if p.ID == productID{
-	// 		tempList = append(tempList, p)
-	// 	}
-	// }
-
-	// r.productList = tempList
-	// return nil
-
 	 query := `
 	  DELETE FROM products WHERE id = $1
 	 `
@@ -152,13 +120,6 @@ func (r *productRepo)	Delete(id int) error{
 }
 
 func (r *productRepo)	Update(p Product) (*Product, error){
-	// 	for idx, p := range r.productList{
-	// 	if p.ID == product.ID{
-	// 		r.productList[idx] = &product
-	// 	}
-	// }
-  // return &product, nil
-
 	 query := `
 	  UPDATE products
 	  SET title=$1, description=$2, price=$3, img_url=$4
