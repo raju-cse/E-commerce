@@ -2,25 +2,23 @@ package repo
 
 import (
 	"database/sql"
+	"ecommerce/domain"
+	"ecommerce/product"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type Product struct{
-	ID           int     `json:"id" db:"id"`
-	Title        string  `json:"title" db:"title"`
-	Description  string  `json:"description" db:"description"`
-	Price        float64 `json:"price" db:"price"`
-	IngUrl       string  `json:"imageUrl" db:"img_url"`
-}
+// type Product struct{
+// 	ID           int     `json:"id" db:"id"`
+// 	Title        string  `json:"title" db:"title"`
+// 	Description  string  `json:"description" db:"description"`
+// 	Price        float64 `json:"price" db:"price"`
+// 	IngUrl       string  `json:"imageUrl" db:"img_url"`
+// }
 
 type ProductRepo interface{
-	Create(p Product) (*Product, error)
-	Get(productID int) (*Product, error)
-	List() ([]*Product, error)
-	Delete(productID int) error
-	Update(p Product) (*Product, error)
+	product.ProductRepo
 }
 
 type productRepo struct{
@@ -33,7 +31,7 @@ func NewProductRepo(db *sqlx.DB) ProductRepo {
     }
 }
 
-func (r *productRepo) Create(p Product) (*Product, error){
+func (r *productRepo) Create(p domain.Product) (*domain.Product, error){
 
 	query := `
 		INSERT INTO products (
@@ -59,9 +57,9 @@ func (r *productRepo) Create(p Product) (*Product, error){
 	return &p, nil
 }
 
-func (r *productRepo) Get(id int) (*Product, error){
+func (r *productRepo) Get(id int) (*domain.Product, error){
 
-	var prd Product
+	var prd domain.Product
 
 	query := `
 	  SELECT
@@ -84,9 +82,9 @@ func (r *productRepo) Get(id int) (*Product, error){
 	return &prd, nil
 }
 
-func (r *productRepo) List() ([]*Product, error){
+func (r *productRepo) List() ([]*domain.Product, error){
 
-	var prdList []*Product
+	var prdList []*domain.Product
 
 	query := `
 	  SELECT
@@ -119,7 +117,7 @@ func (r *productRepo)	Delete(id int) error{
 	return nil
 }
 
-func (r *productRepo)	Update(p Product) (*Product, error){
+func (r *productRepo)	Update(p domain.Product) (*domain.Product, error){
 	 query := `
 	  UPDATE products
 	  SET title=$1, description=$2, price=$3, img_url=$4

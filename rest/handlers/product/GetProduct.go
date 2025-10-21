@@ -20,7 +20,7 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request){
 		
 	}
 
-  product, err := h.productRepo.Get(pId)
+  product, err := h.svc.Get(pId)
 
 	if err != nil{
 		fmt.Println(err)
