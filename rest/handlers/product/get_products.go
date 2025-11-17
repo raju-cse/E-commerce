@@ -4,8 +4,10 @@ import (
 	"ecommerce/util"
 	"net/http"
 	"strconv"
+	"time"
 )
 
+var cnt int64
 
 func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){	
 
@@ -31,13 +33,22 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){
 	return
  }	
 
- cnt, err := h.svc.Count()
- if err != nil{
-	util.SendError(w, http.StatusInternalServerError, "Internal server error")
-	return
- }
+ go func ()  {
+	 cnt1, err := h.svc.Count()
+     if err != nil{
+	   util.SendError(w, http.StatusInternalServerError, "Internal server error")
+	  return
+   }
+   cnt = cnt1
+ }()
 
+  time.Sleep(10 * time.Millisecond)
 
+	//  cnt1, err := h.svc.Count()
+  //    if err != nil{
+	//    util.SendError(w, http.StatusInternalServerError, "Internal server error")
+	//   return
+  //  }
  
  util.SendPage(w, productList, page, limit, cnt)
 
