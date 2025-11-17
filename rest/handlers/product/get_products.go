@@ -4,7 +4,7 @@ import (
 	"ecommerce/util"
 	"net/http"
 	"strconv"
-	"time"
+	"sync"
 )
 
 var cnt int64
@@ -33,7 +33,13 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){
 	return
  }	
 
+ var wg sync.WaitGroup
+
+ wg.Add(1)
  go func ()  {
+  
+	 defer wg.Done()
+
 	 cnt1, err := h.svc.Count()
      if err != nil{
 	   util.SendError(w, http.StatusInternalServerError, "Internal server error")
@@ -42,7 +48,8 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){
    cnt = cnt1
  }()
 
-  time.Sleep(10 * time.Millisecond)
+ wg.Wait()
+  // time.Sleep(10 * time.Millisecond)
 
 	//  cnt1, err := h.svc.Count()
   //    if err != nil{
