@@ -8,6 +8,7 @@ import (
 )
 
 var cnt int64
+var mu sync.Mutex
 
 func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){	
 
@@ -39,7 +40,9 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){
  go func ()  {
   
 	 defer wg.Done()
-
+   
+	 mu.Lock()
+	 defer mu.Unlock()
 	 cnt1, err := h.svc.Count()
      if err != nil{
 	   util.SendError(w, http.StatusInternalServerError, "Internal server error")
