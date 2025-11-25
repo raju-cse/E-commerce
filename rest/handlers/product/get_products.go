@@ -1,14 +1,14 @@
 package product
 
 import (
+	"ecommerce/domain"
 	"ecommerce/util"
 	"net/http"
 	"strconv"
-	"sync"
 )
 
-var cnt int64
-var mu sync.Mutex
+// var cnt int64
+// var mu sync.Mutex
 
 func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){	
 
@@ -28,30 +28,35 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){
 	limit = 10
  }
  
- productList, err := h.svc.List(page, limit)
- if err != nil{
-	util.SendError(w, http.StatusInternalServerError, "Internal server error")
+ prdCh := make(chan []*domain.Product)
+ go func ()  {
+   productList, err := h.svc.List(page, limit)
+   if err != nil{
+	 util.SendError(w, http.StatusInternalServerError, "Internal server error")
 	return
- }	
+ }
+   prdCh <- productList
+ }()
+	
+//  var wg sync.WaitGroup
+  
+ ch := make(chan int64)
 
- var wg sync.WaitGroup
-
- wg.Add(1)
+//  wg.Add(1)
  go func ()  {
   
-	 defer wg.Done()
+	 //defer wg.Done()
    
-	 mu.Lock()
-	 defer mu.Unlock()
 	 cnt1, err := h.svc.Count()
      if err != nil{
 	   util.SendError(w, http.StatusInternalServerError, "Internal server error")
 	  return
    }
-   cnt = cnt1
+   
+	 ch <- cnt1
  }()
 
- wg.Wait()
+ //wg.Wait()
   // time.Sleep(10 * time.Millisecond)
 
 	//  cnt1, err := h.svc.Count()
@@ -59,8 +64,12 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request){
 	//    util.SendError(w, http.StatusInternalServerError, "Internal server error")
 	//   return
   //  }
+
+	productList := <- prdCh
+	totalCnt := <- ch
+	
  
- util.SendPage(w, productList, page, limit, cnt)
+ util.SendPage(w, productList, page, limit, totalCnt)
 
 
 }
